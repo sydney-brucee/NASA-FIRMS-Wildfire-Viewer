@@ -35,8 +35,8 @@ def main() -> None:
         initial_sidebar_state="expanded",
     )
     st.title("🔥 NASA FIRMS Wildfire Detection Viewer")
-    st.markdown("Interactive portfolio project visualizing sample wildfire detections"
-                "modeled on NASA FIRMS MODIS active fire data."
+    st.markdown("Interactive portfolio project visualizing sample wildfire detections "
+                "modeled on NASA FIRMS MODIS active fire data. "
                 "Filter by date, brightness, and confidence to explore detections on an interactive map."
                 )
 
@@ -47,8 +47,8 @@ def main() -> None:
     st.sidebar.header("Filters")
     st.sidebar.markdown("Adjust parameters to filter detections.")
 
-    min_date = df["acq_date"].min().date()
-    max_date = df["acq_date"].max().date()
+    min_date = df["Acquired"].min().date()
+    max_date = df["Acquired"].max().date()
 
     date_range = st.sidebar.date_input(
         "Date range",
@@ -62,8 +62,8 @@ def main() -> None:
     else:
         start_date, end_date = min_date, max_date
 
-    bright_min = float(df["brightness"].min())
-    bright_max = float(df["brightness"].max())
+    bright_min = float(df["Brightness"].min())
+    bright_max = float(df["Brightness"].max())
 
     min_brightness = st.sidebar.slider(
         "Minimum Brightness (K)",
@@ -121,14 +121,18 @@ def main() -> None:
     else:
         # Add color column for pydeck
         map_df = filtered_df.copy()
-        map_df["acq_date"] = map_df["acq_date"].dt.strftime("%Y-%m-%d")
-        map_df["color"] = map_df["brightness"].apply(
+        map_df["Acquired"] = map_df["Acquired"].dt.strftime("%Y-%m-%d")
+
+        map_df["Latitude"] = map_df["Latitude"].astype(float)
+        map_df["Longitude"] = map_df["Longitude"].astype(float)
+
+        map_df["color"] = map_df["Brightness"].apply(
             lambda b: brightness_to_color(b, min_brightness, max_brightness)
         )
         layer = pdk.Layer(
             "ScatterplotLayer",
             data=map_df,
-            get_position=["longitude", "latitude"],
+            get_position="[Longitude, Latitude]",
             get_fill_color="color",
             get_radius=8000,
             radius_min_pixels=3,
@@ -139,8 +143,8 @@ def main() -> None:
 
         # Center view on data
         view_state = pdk.ViewState(
-            latitude=float(map_df["latitude"].mean()),
-            longitude=float(map_df["longitude"].mean()),
+            latitude=float(map_df["Latitude"].mean()),
+            longitude=float(map_df["Longitude"].mean()),
             zoom=5.5,
             pitch=0,
         )
@@ -150,15 +154,15 @@ def main() -> None:
             initial_view_state=view_state,
             tooltip={
                 "html": """
-                <b>Brightness:</b> {brightness} K<br/>
-                <b>Confidence:</b> {confidence}%<br/>
-                <b>FRP:</b> {frp} MW<br/>
-                <b>Satellite:</b> {satellite}<br/>
-                <b>Date:</b> {acq_date}
+                <b>Brightness:</b> {Brightness} K<br/>
+                <b>Confidence:</b> {Confidence}%<br/>
+                <b>FRP:</b> {FRP} MW<br/>
+                <b>Satellite:</b> {Satellite}<br/>
+                <b>Date:</b> {Acquired}
                 """,
                 "style": {"backgroundColor": "steelblue", "color": "white"},
             },
-            map_style="mapbox://styles/mapbox/dark-v10",
+            map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
         )
 
         st.pydeck_chart(deck, use_container_width=True)
@@ -169,19 +173,19 @@ def main() -> None:
             st.write("No data to display.")
         else:
             display_df = filtered_df.copy()
-            display_df["acq_date"] = display_df["acq_date"].dt.strftime("%Y-%m-%d")
+            display_df["Acquired"] = display_df["Acquired"].dt.strftime("%Y-%m-%d")
             st.dataframe(
                 display_df,
                 use_container_width=True,
                 hide_index=True,
                 column_config={
-                    "latitude": st.column_config.NumberColumn("Latitude", format="%.4f"),
-                    "longitude": st.column_config.NumberColumn("Longitude", format="%.4f"),
-                    "brightness": st.column_config.NumberColumn("Brightness", format="%.1f"),
-                    "confidence": st.column_config.NumberColumn("Confidence"),
-                    "acq_date": st.column_config.TextColumn("Date"),
-                    "frp": st.column_config.NumberColumn("FRP (MW)", format="%.1f"),
-                    "satellite": st.column_config.TextColumn("Satellite"),
+                    "Latitude": st.column_config.NumberColumn("Latitude", format="%.4f"),
+                    "Longitude": st.column_config.NumberColumn("Longitude", format="%.4f"),
+                    "Brightness": st.column_config.NumberColumn("Brightness", format="%.1f"),
+                    "Confidence": st.column_config.NumberColumn("Confidence"),
+                    "Acquired": st.column_config.TextColumn("Acquired"),
+                    "FRP": st.column_config.NumberColumn("FRP (MW)", format="%.1f"),
+                    "Satellite": st.column_config.TextColumn("Satellite"),
                 },
             )
             st.caption(f"Showing {len(display_df):,} of {len(df):,} total sample detections.")

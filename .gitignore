@@ -9,11 +9,8 @@ env/
 ENV/
 .venv/
 
-# Streamlit
-.streamlit/
-
-# Data (keep if sample if desired, or ignore)
-# data/*.csv
+# Data
+data/*.csv
 
 # IDE
 .idea/

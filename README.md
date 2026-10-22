@@ -6,12 +6,12 @@ A polished, interactive Streamlit web application that visualizes sample wildfir
 
 This application loads (or automatically generates) realistic sample wildfire detections with the standard NASA FIRMS columns:
 
-- `latitude`, `longitude`
-- `brightness` (temperature in Kelvin)
-- `confidence` (0–100)
-- `acq_date`
-- `frp` (Fire Radiative Power in MW)
-- `satellite` (Terra / Aqua)
+- `Latitude`, `Longitude`
+- `Brightness` (temperature in Kelvin)
+- `Confidence` (0–100)
+- `Acquired`
+- `FRP` (Fire Radiative Power in MW)
+- `Satellite` (Terra / Aqua)
 
 Users can filter the data interactively and explore results through summary metrics, a color-coded interactive map (powered by pydeck), and a detailed data table.
 
@@ -23,16 +23,20 @@ Users can filter the data interactively and explore results through summary metr
 - **Interactive map** — pydeck ScatterplotLayer with points colored by brightness intensity
 - **Expandable data table** — full filtered results with clean formatting
 - **Modular architecture** — data logic cleanly separated from the UI
+- **Dark theme** — configured via `.streamlit/config.toml`
+- **California-focused sample data** — points are generated inside a simplified California boundary so they stay over land
 
 ## Project Structure
 
 ```
 .
-├── app.py                  # Main Streamlit application
+├── .streamlit/
+│   └── config.toml         # Dark theme configuration
+├── app.py
 ├── src/
-│   └── data_utils.py       # Data generation, loading, filtering, and summary stats
+│   └── data_utils.py
 ├── data/
-│   └── sample_firms.csv    # Generated sample data (created automatically)
+│   └── sample_firms.csv    # Generated on build
 ├── requirements.txt
 └── README.md
 ```
